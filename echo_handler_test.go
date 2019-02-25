@@ -284,10 +284,7 @@ func TestEchoHandler(t *testing.T) {
 	for testNumber, test := range tests {
 		var buffer bytes.Buffer
 
-		writer := newDataWriter(&buffer)
-		reader := newDataReader(bytes.NewReader(test.Bytes))
-
-		var ctx *Context = NewContext(nil, reader, writer)
+		var ctx *Context = NewContext(nil, bytes.NewReader(test.Bytes), &buffer)
 
 		EchoHandler.ServeTELNET(*ctx)
 
