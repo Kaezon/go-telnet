@@ -1,28 +1,24 @@
 package telsh
 
-
 import (
-	"github.com/reiver/go-telnet"
-
 	"bytes"
 	"strings"
 
 	"testing"
-)
 
+	"go-telnet"
+)
 
 func TestServeTELNETCommandNotFound(t *testing.T) {
 
-	tests := []struct{
+	tests := []struct {
 		ClientSends string
-		Expected   string
+		Expected    string
 	}{
 		{
 			ClientSends: "\r\n",
-			Expected: "",
+			Expected:    "",
 		},
-
-
 
 		{
 			ClientSends: "apple\r\n",
@@ -37,55 +33,46 @@ func TestServeTELNETCommandNotFound(t *testing.T) {
 			Expected:    "cherry: command not found\r\n",
 		},
 
-
-
 		{
 			ClientSends: "\t\r\n",
-			Expected: "",
+			Expected:    "",
 		},
 		{
 			ClientSends: "\t\t\r\n",
-			Expected: "",
+			Expected:    "",
 		},
 		{
 			ClientSends: "\t\t\t\r\n",
-			Expected: "",
+			Expected:    "",
 		},
-
-
 
 		{
 			ClientSends: " \r\n",
-			Expected: "",
+			Expected:    "",
 		},
 		{
 			ClientSends: "  \r\n",
-			Expected: "",
+			Expected:    "",
 		},
 		{
 			ClientSends: "   \r\n",
-			Expected: "",
+			Expected:    "",
 		},
-
-
 
 		{
 			ClientSends: " \t\r\n",
-			Expected: "",
+			Expected:    "",
 		},
 		{
 			ClientSends: "\t \r\n",
-			Expected: "",
+			Expected:    "",
 		},
-
-
 
 		{
 			ClientSends: "ls -alF\r\n",
 			Expected:    "ls: command not found\r\n",
 		},
 	}
-
 
 	for testNumber, test := range tests {
 
@@ -95,12 +82,11 @@ func TestServeTELNETCommandNotFound(t *testing.T) {
 			continue
 		}
 
-
-		ctx := telnet.NewContext()
-
 		var buffer bytes.Buffer
 
-		shellHandler.ServeTELNET(ctx, &buffer, strings.NewReader(test.ClientSends))
+		var ctx *telnet.Context = telnet.NewContext(nil, strings.NewReader(test.ClientSends), &buffer)
+
+		shellHandler.ServeTELNET(*ctx)
 
 		if expected, actual := shellHandler.WelcomeMessage+shellHandler.Prompt+test.Expected+shellHandler.Prompt+shellHandler.ExitMessage, buffer.String(); expected != actual {
 			t.Errorf("For test #%d, expect %q, but actually got %q; for client sent: %q", testNumber, expected, actual, test.ClientSends)
