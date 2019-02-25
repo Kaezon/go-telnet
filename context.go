@@ -1,31 +1,38 @@
 package telnet
 
+import (
+	"net"
 
-type Context interface {
-	Logger() Logger
+	"github.com/reiver/go-oi"
+)
 
-	InjectLogger(Logger) Context
+type Context struct {
+	Logger     Logger
+	Connection net.Conn
+	Reader     *internalDataReader
+	Writer     *internalDataWriter
 }
 
-
-type internalContext struct {
-	logger Logger
-}
-
-
-func NewContext() Context {
-	ctx := internalContext{}
+func NewContext(conn net.Conn, reader *internalDataReader, writer *internalDataWriter) *Context {
+	ctx := Context{Connection: conn, Reader: reader, Writer: writer}
 
 	return &ctx
 }
 
-
-func (ctx *internalContext) Logger() Logger {
-	return ctx.logger
-}
-
-func (ctx *internalContext) InjectLogger(logger Logger) Context {
-	ctx.logger = logger
+func (ctx *Context) InjectLogger(logger Logger) *Context {
+	ctx.Logger = logger
 
 	return ctx
+}
+
+func (ctx *Context) Read(data []byte) (n int, err error) {
+	return ctx.Reader.Read(data)
+}
+
+func (ctx *Context) Write(data []byte) (n int, err error) {
+	return ctx.Writer.Write(data)
+}
+
+func (ctx *Context) LongWrite(data []byte) {
+	oi.LongWrite(ctx.Writer, data)
 }
